@@ -78,7 +78,7 @@ async function makePayment(data) {
         throw error;
     }
 }
-
+ 
 
 async function cancelBooking(bookingId) {
     const transaction = await db.sequelize.transaction();
@@ -90,7 +90,7 @@ async function cancelBooking(bookingId) {
             return true;
         }
         await axios.patch(`${ServerConfig.FLIGHT_SERVICE}/api/v1/flights/${bookingDetails.flightId}/seats`, {
-            seats: bookingDetails.noOfSeats,
+            seats: bookingDetails.noOfSeats,  //
             dec: 0
         });
         await bookingRepository.update(bookingId, {status: CANCELLED}, transaction);
@@ -103,9 +103,19 @@ async function cancelBooking(bookingId) {
 }
 
 
-
+async function cancelOldBookings(params) {
+    try {
+        const Time=new Date(Date.now()- 1000 * 300);  // time 5 mins ago;
+        const response=await bookingRepository.cancelOldBookings(Time);
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 module.exports={
     createBooking,
-    makePayment
+    makePayment,
+    cancelOldBookings,
+
 }
